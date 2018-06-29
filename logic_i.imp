@@ -1,0 +1,133 @@
+/* logic_i
+ * Author: Szegedi Gábor D071PO
+ * Creation date: 2018-06-29
+ */
+IMPLEMENTATION logic_i
+REFINES logic
+
+IMPORTS
+    io.io
+
+DEFINITIONS
+    "constants.def"
+    
+CONCRETE_VARIABLES
+    a, b, c, c_has_special, c_special_index, logic_status
+
+INVARIANT
+    logic_status : LOGIC_STATE
+    & a : 0..arraySize - 1 --> minValue .. maxValue
+    & b : 0..arraySize - 1 --> minValue .. maxValue
+    & c : 0..arraySize - 1 --> INT
+    
+    & a = a
+    & b = b
+    & c = c
+    
+    & (logic_status = LOGIC_INITIALIZING => io.io_status = IO_INITIALIZING)
+    & (logic_status = LOGIC_A_READ => io.io_status = IO_A_READ)
+    & (logic_status = LOGIC_B_READ => io.io_status = IO_B_READ)
+    & (logic_status = LOGIC_C_CALCULATED => io.io_status = IO_B_READ)
+    & (logic_status = LOGIC_SPECIAL_SEARCH_DONE => io.io_status = IO_B_READ)
+    & (logic_status = LOGIC_COMPLETED => io.io_status = IO_WRITTEN)
+
+INITIALISATION
+    logic_status := LOGIC_INITIALIZING;
+    a := (0..arraySize - 1)*{minValue};
+    b := (0..arraySize - 1)*{minValue};
+    c := (0..arraySize - 1)*{minValue};
+    c_has_special := FALSE;
+    c_special_index := 0
+ 
+OPERATIONS
+    init =
+    BEGIN
+        logic_status := LOGIC_INITIALIZING;
+        io.io_init;
+        a := (0..arraySize - 1)*{minValue};
+        b := (0..arraySize - 1)*{minValue};
+        c := (0..arraySize - 1)*{minValue};
+        c_has_special := FALSE;
+        c_special_index := 0
+    END;
+    
+    init_a =
+    BEGIN
+        a <-- io.read_a;
+        logic_status := LOGIC_A_READ
+    END;
+    
+    init_b =
+    BEGIN
+        b <-- io.read_b(a);
+        logic_status := LOGIC_B_READ
+    END;
+    
+    calculate =
+    BEGIN
+        VAR index, n IN
+            index := 0;
+            n := arraySize;
+			WHILE index < n DO
+			    c(index) := 19*a(index)-9*b(index)+4;
+   		        index := index+1
+			INVARIANT
+			    index : 0 ..n
+				& c : 0..arraySize - 1 --> INT
+				& !i.(i : 0..arraySize - 1 => 19*a(i)-9*b(i)+4 : INT)
+				& !i.(i : 0..index-1 => c(i) = 19*a(i)-9*b(i)+4)
+			VARIANT
+				n-index
+			END
+		END;
+       logic_status := LOGIC_C_CALCULATED
+    END;
+    
+   search =
+   BEGIN
+       VAR index, t_found, t_ind, tmp1, tmp2, n IN
+           index := 0;
+		   t_ind := 0;
+           t_found := FALSE;
+           tmp1 := 0;
+           tmp2 := 0;
+           n := arraySize;
+           WHILE t_found = FALSE & index < n DO
+               tmp1 := c(index);
+               IF 0 <= tmp1 THEN
+                   tmp2 := tmp1 mod 32;
+                   IF tmp2 = 25 THEN
+                       t_found := TRUE;
+                       t_ind := index
+                   ELSE
+                       t_found := FALSE;
+                       t_ind := 0
+                   END
+               	END;
+               index := index + 1
+           INVARIANT
+               t_found : BOOL
+               & index : 0..n
+               & t_ind : 0..n-1
+               & t_ind <= index
+               & c : 0..arraySize - 1 --> INT
+               & tmp1 : INT
+               & tmp2 : NAT
+               & (t_found = TRUE => (!i.(i : 0 .. t_ind-1 => (0 <= c(i) => not(c(i) mod 32 = 25))) & c(t_ind) mod 32 = 25))
+               & (t_found = FALSE => !i.(i : 0..index-1 => (0 <= c(i) => not(c(i) mod 32 = 25))))
+           VARIANT
+               n-index
+           END;
+           c_has_special := t_found;
+           c_special_index := t_ind
+       END;
+       logic_status := LOGIC_SPECIAL_SEARCH_DONE
+   END;
+    
+    write_result =
+    BEGIN
+        io.write_result(c, c_has_special, c_special_index);
+        logic_status := LOGIC_COMPLETED
+    END
+
+END

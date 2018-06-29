@@ -1,0 +1,4 @@
+DEFINITIONS
+arraySize == 5;
+minValue == -100;
+maxValue == 100
