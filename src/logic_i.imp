@@ -20,9 +20,9 @@ INVARIANT
     & b_array : 0..arraySize - 1 --> minValue .. maxValue
     & c_array : 0..arraySize - 1 --> INT
     
-    & a_array = a_array
-    & b_array = b_array
-    & c_array = c_array
+    & a_array = abstract_a_array
+    & b_array = abstract_b_array
+    & c_array = abstract_c_array
     
     & (logic_status = LOGIC_INITIALIZING => io.io_status = IO_INITIALIZING)
     & (logic_status = LOGIC_A_READ => io.io_status = IO_A_READ)
@@ -43,6 +43,7 @@ OPERATIONS
     init =
     BEGIN
         logic_status := LOGIC_INITIALIZING;
+        io.io_init;
         a_array := (0..arraySize - 1)*{minValue};
         b_array := (0..arraySize - 1)*{minValue};
         c_array := (0..arraySize - 1)*{minValue};
@@ -64,62 +65,63 @@ OPERATIONS
     
     calculate =
     BEGIN
-        VAR index IN
+        VAR index, nn IN
             index := 0;
-			WHILE index < arraySize DO
-			    c_array(index) := 19*a_array(index)-9*b_array(index)+4;
+            nn := arraySize;
+			WHILE index < nn DO
+			    c_array(index) := 19*a_array(index) + (-9)*b_array(index) + 4;
    		        index := index+1
 			INVARIANT
-			    index : 0 ..arraySize
-				& c_array : 0..arraySize - 1 --> INT
-				& !ii.(ii : 0..arraySize - 1 => 19*a_array(ii)-9*b_array(ii)+4 : INT)
-				& !ii.(ii : 0..index-1 => c_array(ii) = 19*a_array(ii)-9*b_array(ii)+4)
+			    index : 0..nn
+				& c_array : 0..nn - 1 --> INT
+				& !ii.(ii : 0..nn - 1 => 19*a_array(ii) + (-9)*b_array(ii) + 4 : INT)
+				& !ii.(ii : 0..index-1 => c_array(ii) = 19*a_array(ii) + (-9)*b_array(ii) + 4)
 			VARIANT
-				arraySize-index
+				nn-index
 			END
 		END;
        logic_status := LOGIC_C_CALCULATED
     END;
     
-   search =
-   BEGIN
-       VAR index, t_found, t_ind, tmp1, tmp2 IN
-           index := 0;
-		   t_ind := 0;
-           t_found := FALSE;
-           tmp1 := 0;
-           tmp2 := 0;
-           WHILE t_found = FALSE & index < arraySize DO
-               tmp1 := c_array(index);
-               IF 0 <= tmp1 THEN
+    search =
+    BEGIN
+        VAR index, t_found, t_ind, tmp1, tmp2 IN
+            index := 0;
+		    t_ind := 0;
+            t_found := FALSE;
+            tmp1 := 0;
+            tmp2 := 0;
+            WHILE t_found = FALSE & index < arraySize DO
+                tmp1 := c_array(index);
+                IF 0 <= tmp1 THEN
                    tmp2 := tmp1 mod 32;
-                   IF tmp2 = 25 THEN
-                       t_found := TRUE;
-                       t_ind := index
-                   ELSE
-                       t_found := FALSE;
-                       t_ind := 0
-                   END
-               	END;
-               index := index + 1
-           INVARIANT
-               t_found : BOOL
-               & index : 0..arraySize
-               & t_ind : 0..arraySize-1
-               & t_ind <= index
-               & c_array : 0..arraySize - 1 --> INT
-               & tmp1 : INT
-               & tmp2 : NAT
-               & (t_found = TRUE => (!ii.(ii : 0 .. t_ind-1 => (0 <= c_array(ii) => not(c_array(ii) mod 32 = 25))) & c_array(t_ind) mod 32 = 25))
-               & (t_found = FALSE => !ii.(ii : 0..index-1 => (0 <= c_array(ii) => not(c_array(ii) mod 32 = 25))))
-           VARIANT
-               arraySize-index
-           END;
-           c_has_special := t_found;
-           c_special_index := t_ind
-       END;
-       logic_status := LOGIC_SPECIAL_SEARCH_DONE
-   END;
+                    IF tmp2 = 25 THEN
+                        t_found := TRUE;
+                        t_ind := index
+                    ELSE
+                        t_found := FALSE;
+                        t_ind := 0
+                     END
+            	END;
+                index := index + 1
+            INVARIANT
+                t_found : BOOL
+                & index : 0..arraySize
+                & t_ind : 0..arraySize-1
+                & t_ind <= index
+                & c_array : 0..arraySize - 1 --> INT
+                & tmp1 : INT
+                & tmp2 : NAT
+                & (t_found = TRUE => (!ii.(ii : 0 .. t_ind-1 => (0 <= c_array(ii) => not(c_array(ii) mod 32 = 25))) & c_array(t_ind) mod 32 = 25))
+                & (t_found = FALSE => !ii.(ii : 0..index-1 => (0 <= c_array(ii) => not(c_array(ii) mod 32 = 25))))
+            VARIANT
+                arraySize-index
+            END;
+            c_has_special := t_found;
+            c_special_index := t_ind
+        END;
+        logic_status := LOGIC_SPECIAL_SEARCH_DONE
+    END;
     
     write_result =
     BEGIN

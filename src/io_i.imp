@@ -18,6 +18,11 @@ INITIALISATION
     io_status := IO_INITIALIZING
     
 OPERATIONS
+    io_init =
+    BEGIN
+        io_status := IO_INITIALIZING
+    END;
+    
     a_array <--read_a =
     BEGIN
         STRING_WRITE("Kérek |");

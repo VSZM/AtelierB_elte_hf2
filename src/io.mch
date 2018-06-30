@@ -21,6 +21,9 @@ INITIALISATION
     io_status := IO_INITIALIZING
     
 OPERATIONS
+    io_init = io_status := IO_INITIALIZING;
+
+    
     a_array <--read_a =
     PRE
         io_status = IO_INITIALIZING
