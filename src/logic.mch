@@ -37,7 +37,8 @@ INITIALISATION
 OPERATIONS
 
     init =
-        logic_status := LOGIC_INITIALIZING
+    BEGIN
+        logic_status := LOGIC_INITIALIZING 
         || a_array :: 0..arraySize - 1 --> minValue .. maxValue
         || b_array :: 0..arraySize - 1 --> minValue .. maxValue
         || c_array :: 0..arraySize - 1 --> INT
