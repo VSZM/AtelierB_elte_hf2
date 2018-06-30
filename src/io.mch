@@ -21,11 +21,11 @@ INITIALISATION
     io_status := IO_INITIALIZING
     
 OPERATIONS
-    ret <--read_a =
+    a_array <--read_a =
     PRE
         io_status = IO_INITIALIZING
     THEN
-        ret :: 0..arraySize - 1 --> minValue .. maxValue
+        a_array :: 0..arraySize - 1 --> minValue .. maxValue
         || io_status := IO_A_READ
     END;
     

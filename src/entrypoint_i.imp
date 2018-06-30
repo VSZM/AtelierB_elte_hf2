@@ -16,7 +16,7 @@ OPERATIONS
         init_b;
         calculate;
         search;
-        write_result;        
+        write_result        
     END
 
  END
