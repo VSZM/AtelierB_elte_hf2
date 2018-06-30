@@ -21,15 +21,15 @@ INITIALISATION
     io_status := IO_INITIALIZING
     
 OPERATIONS
-    a <--read_a =
+    ret <--read_a =
     PRE
         io_status = IO_INITIALIZING
     THEN
-        a :: 0..arraySize - 1 --> minValue .. maxValue
+        ret :: 0..arraySize - 1 --> minValue .. maxValue
         || io_status := IO_A_READ
     END;
     
-    b <--read_b =
+    b_array <--read_b =
     PRE
         io_status = IO_A_READ
     THEN
@@ -37,18 +37,18 @@ OPERATIONS
           arr : 0 .. arraySize - 1 --> minValue .. maxValue
         //  & !index.(index : 1..arraySize - 1 => arr(index) <= arr(index))
        THEN
-          b := arr
+          b_array := arr
        	  || io_status := IO_B_READ
        END
     END;
     
-    write_result(c, special_element_found, special_element_index) =
+    write_result(c_array, special_element_found, special_element_index) =
     PRE
-        c : 0..arraySize - 1 --> INT
+        c_array : 0..arraySize - 1 --> INT
         & special_element_found : BOOL
         & special_element_index : INT
-        & (special_element_found = TRUE => (!index.(index : 0..special_element_index - 1 => (0 <= c(index) => not(c(index) mod 32 = 25))) & c(special_element_index) mod 32 = 25))
-        & (special_element_found = FALSE => !index.(index : 0..arraySize - 1 => (0 <= c(index) => not(c(index) mod 32 = 25))))
+        & (special_element_found = TRUE => (!index.(index : 0..special_element_index - 1 => (0 <= c_array(index) => not(c_array(index) mod 32 = 25))) & c_array(special_element_index) mod 32 = 25))
+        & (special_element_found = FALSE => !index.(index : 0..arraySize - 1 => (0 <= c_array(index) => not(c_array(index) mod 32 = 25))))
         & io_status = IO_B_READ
     THEN
         io_status := IO_WRITTEN
