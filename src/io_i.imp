@@ -52,7 +52,7 @@ OPERATIONS
         io_status := IO_A_READ
     END;
 
-    b_array <--read_b =
+    b_array <-- read_b =
     BEGIN
         STRING_WRITE("Kérek |");
         INT_WRITE(arraySize);
@@ -60,20 +60,23 @@ OPERATIONS
         INT_WRITE(minValue);
         STRING_WRITE("| és |");
         INT_WRITE(maxValue);
-        STRING_WRITE("| között úgy, hogy minden szám kisebb legyen az előzőnél! Elrakom őket a 'B' tömbbe.\n");
+        STRING_WRITE("| között úgy, hogy minden szám kisebb vagy egyenlő legyen az előzőnél! Elrakom őket a 'B' tömbbe.\n");
 
-        VAR index, readint IN // TODO: Remove size? Replace it with arraySize 
+        VAR index, readint, maximum IN // TODO: Remove size? Replace it with arraySize 
             index := 0;
             readint := minValue;
-            b_array := (0..arraySize - 1)*{minValue};
+            maximum := maxValue;
+            b_array := (0..arraySize - 1)*{maxValue};
 			WHILE index < arraySize DO
-			    readint <-- INTERVAL_READ( minValue, maxValue ); // TOOO: Store the previous read value as max and replace maxValue with it.
+			    readint <-- INTERVAL_READ( minValue, maximum); // TODO: Store the previous read value as max and replace maxValue with it.
 			    b_array(index) := readint;
+			    maximum := readint;
                 index := index + 1
 			INVARIANT
 				index : 0..arraySize
+				& maximum: minValue..maxValue
 				& b_array : 0..arraySize - 1 --> minValue .. maxValue
-				//& !i.(i : 1..index-1 => b_array(i) < b_array(i-1))
+				//& !ii.(ii : 0..index - 2 => b_array(ii) >= b_array(ii+1))
 			VARIANT
 				arraySize-index
 			END

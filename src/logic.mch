@@ -19,6 +19,7 @@ INVARIANT
     & abstract_a_array : 0..arraySize - 1 --> minValue .. maxValue
     & abstract_b_array : 0..arraySize - 1 --> minValue .. maxValue
     & abstract_c_array : 0..arraySize - 1 --> INT
+    
     & c_has_special : BOOL
     & c_special_index : 0..arraySize - 1
     & (logic_status : {LOGIC_C_CALCULATED, LOGIC_SPECIAL_SEARCH_DONE, LOGIC_COMPLETED} => !index.(index : 0..arraySize - 1 =>  19*abstract_a_array(index) + (-9)*abstract_b_array(index) + 4 = abstract_c_array(index) ))

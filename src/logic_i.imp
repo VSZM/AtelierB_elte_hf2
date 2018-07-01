@@ -16,8 +16,8 @@ CONCRETE_VARIABLES
 
 INVARIANT
     logic_status : LOGIC_STATE
-    & a_array : 0..arraySize - 1 --> minValue .. maxValue
-    & b_array : 0..arraySize - 1 --> minValue .. maxValue
+    & a_array : 0..arraySize - 1 --> minValue..maxValue
+    & b_array : 0..arraySize - 1 --> minValue..maxValue
     & c_array : 0..arraySize - 1 --> INT
     
     & a_array = abstract_a_array
@@ -68,7 +68,7 @@ OPERATIONS
         VAR index, nn IN
             index := 0;
             nn := arraySize;
-			WHILE index < nn DO
+			WHILE index /= nn DO
 			    c_array(index) := 19*a_array(index) + (-9)*b_array(index) + 4;
    		        index := index+1
 			INVARIANT
@@ -85,24 +85,21 @@ OPERATIONS
     
     search =
     BEGIN
-        VAR index, t_found, t_ind, tmp1, tmp2 IN
+        VAR index, t_found, t_ind, actual, mod_value IN
             index := 0;
 		    t_ind := 0;
             t_found := FALSE;
-            tmp1 := 0;
-            tmp2 := 0;
-            WHILE t_found = FALSE & index < arraySize DO
-                tmp1 := c_array(index);
-                IF 0 <= tmp1 THEN
-                   tmp2 := tmp1 mod 32;
-                    IF tmp2 = 25 THEN
+            actual := 0;
+            mod_value := 0;
+            WHILE t_found = FALSE & index /= arraySize DO
+                actual := c_array(index);
+                IF 0 <= actual THEN
+                   mod_value := actual mod 32;
+                    IF mod_value = 25 THEN
                         t_found := TRUE;
                         t_ind := index
-                    ELSE
-                        t_found := FALSE;
-                        t_ind := 0
-                     END
-            	END;
+                   	END
+                END;
                 index := index + 1
             INVARIANT
                 t_found : BOOL
@@ -110,9 +107,9 @@ OPERATIONS
                 & t_ind : 0..arraySize-1
                 & t_ind <= index
                 & c_array : 0..arraySize - 1 --> INT
-                & tmp1 : INT
-                & tmp2 : NAT
-                & (t_found = TRUE => (!ii.(ii : 0 .. t_ind-1 => (0 <= c_array(ii) => not(c_array(ii) mod 32 = 25))) & c_array(t_ind) mod 32 = 25))
+                & actual : INT
+                & mod_value : NAT
+                & (t_found = TRUE => (!ii.(ii : 0 .. t_ind-1 => (0 <= c_array(ii) => not(c_array(ii) mod 32 = 25))) & 0 <= c_array(t_ind) & c_array(t_ind) mod 32 = 25))
                 & (t_found = FALSE => !ii.(ii : 0..index-1 => (0 <= c_array(ii) => not(c_array(ii) mod 32 = 25))))
             VARIANT
                 arraySize-index
