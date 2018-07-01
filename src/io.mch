@@ -38,7 +38,7 @@ OPERATIONS
     THEN
        ANY arr WHERE
           arr : 0 .. arraySize - 1 --> minValue .. maxValue
-        //  & !index.(index : 1..arraySize - 1 => arr(index) <= arr(index))
+          & !index.(index : 0..arraySize - 2 => arr(index) > arr(index+1))
        THEN
           b_array := arr
        	  || io_status := IO_B_READ
