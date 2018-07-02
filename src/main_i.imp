@@ -1,0 +1,23 @@
+/* main_i
+ * Author: Szegedi Gábor D071PO
+ * Creation date: 2018-06-29
+ */
+IMPLEMENTATION main_i
+    
+REFINES main
+
+IMPORTS
+    business
+
+OPERATIONS
+  main_method =
+      BEGIN
+          init;
+          set_a_array;
+          set_b_array;
+          calc;
+          calc_mod;
+          write_result
+      END
+
+ END

@@ -1,11 +1,10 @@
-/* entrypoint
+/* main
  * Author: Szegedi Gábor D071PO
  * Creation date: 2018-06-29
  */
 MACHINE
-    entrypoint
-    
+    main
 OPERATIONS
-    start = skip
-    
+    main_method = skip
 END
+

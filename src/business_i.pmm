@@ -1,0 +1,11 @@
+﻿THEORY User_Pass IS
+Operation(calc) & ff(0) & pr & pp(rp.1);
+Operation(calc_mod) & ff(0) & pr & pp(rp.1);
+Operation(calc_mod) & ff(0) & dd & ar(b1.59,Once);
+Operation(calc_mod) & ff(0) & pr & ar(b1.46,Once);
+Operation(calc) & ff(0) & dd & pr;
+Operation(calc) & ff(0) & dd & dc(ii$0 = jj) & pr & dd & ar(s1.12,Goal) & pp(rp.1);
+Operation(calc) & ff(0) & dc(ii$7777 = 6) & pr & pr;
+Operation(calc_mod) & ff(0) & dd & pr & ah(ind$7777 : 1..6 & ll$7777 = FALSE & not(ll$7777 = FALSE & ind$7777<=5) => ind$7777 = 6) & pp(rp.0) & pr;
+Operation(calc_mod) & ff(0) & dd & dc(ind$0 = ii) & dd & pr & pr & ph(ii,!ii.(ii : 1..ind$0-1 & 0<=abstract_c_array(ii) => not(abstract_c_array(ii) mod 32 = 25))) & pr & pp(rp.1) & pp(rp.1) & pp(rp.1)
+END 

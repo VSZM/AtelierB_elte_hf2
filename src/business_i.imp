@@ -1,0 +1,130 @@
+/* business_i
+ * Author: Szegedi Gábor D071PO
+ * Creation date: 2018-06-29
+ */
+IMPLEMENTATION
+    business_i
+REFINES
+    business
+DEFINITIONS
+    "constants.def"
+IMPORTS
+    ui.ui
+CONCRETE_VARIABLES
+    a_array, b_array, c_array, c_has_special, c_special_index, logic_status
+INVARIANT
+    a_array: minIndex..maxIndex --> minValue..maxValue
+    & b_array: minIndex..maxIndex --> minValue..maxValue 
+    & c_array: minIndex..maxIndex --> INT
+    & c_has_special: BOOL
+    & c_special_index: minIndex..maxIndex
+    & logic_status: LOGIC_STATE
+    & a_array = abstract_a_array
+    & b_array = abstract_b_array
+    & c_array = abstract_c_array
+    & c_has_special = abstract_c_has_special
+    & c_special_index = abstract_c_special_index
+    & logic_status= abstract_logic_status
+    & (logic_status = LOGIC_INITIALIZING => ui.ui_status = UI_INIT)
+    & (logic_status = LOGIC_A_READ => ui.ui_status = UI_A_IS_READ)
+    & (logic_status = LOGIC_B_READ => ui.ui_status = UI_B_IS_READ)
+    & (logic_status = LOGIC_C_CALCULATED => ui.ui_status = UI_B_IS_READ)
+    & (logic_status = LOGIC_SPECIAL_SEARCH_DONE => ui.ui_status = UI_B_IS_READ)
+    & (logic_status = LOGIC_COMPLETED => ui.ui_status = UI_RES_IS_WRITTEN)
+    
+INITIALISATION
+    a_array := (minIndex..maxIndex)* {minValue};
+    b_array := (minIndex..maxIndex)* {minValue};
+    c_array := (minIndex..maxIndex)* {minValue};
+    c_has_special:= FALSE;
+    c_special_index:= minIndex;
+    logic_status := LOGIC_INITIALIZING
+    
+OPERATIONS
+    init =
+    BEGIN
+        a_array := (minIndex..maxIndex) * {minValue};
+        b_array := (minIndex..maxIndex) * {minValue};
+        c_array := (minIndex..maxIndex) * {minValue} ;
+        c_has_special:= FALSE;
+    	c_special_index:= minIndex;
+    	logic_status := LOGIC_INITIALIZING ;
+   		ui.ui_init
+    END;
+
+    set_a_array =
+    BEGIN
+        a_array <-- ui.read_a_array ;
+        logic_status := LOGIC_A_READ
+    END;
+    
+    set_b_array =
+    BEGIN
+        b_array <-- ui.read_b_array ;
+        logic_status := LOGIC_B_READ
+    END;
+    
+    calc =
+    BEGIN
+        VAR ii IN
+           ii := minIndex;
+       WHILE ii <= maxIndex DO
+           c_array(ii) := (19*a_array(ii) + (-9)*b_array(ii) + 4);
+           ii := ii + 1
+       INVARIANT
+           ii : minIndex..maxIndex+1
+           & dom(c_array) = minIndex..maxIndex
+           & c_array : minIndex..maxIndex --> INT
+           & !jj.(jj : minIndex..ii-1 => (19*a_array(jj) + (-9)*b_array(jj) + 4) : MININT..MAXINT)
+           & !jj.(jj : minIndex..ii-1 => c_array(jj) = (19*a_array(jj) + (-9)*b_array(jj) + 4))
+       VARIANT
+              maxIndex+1 - ii
+            END
+        END;
+        logic_status := LOGIC_C_CALCULATED
+    END;
+    
+    calc_mod =
+   BEGIN
+       VAR ind, jj, ll, val, mar, tmp IN
+           ind := minIndex;
+           jj := minIndex;
+           ll := FALSE;
+           val := 0;
+           mar := 0;
+           tmp := maxIndex;
+           WHILE ll = FALSE & ind <= maxIndex DO
+               val := c_array(ind);
+               IF val>=0 THEN
+               		mar := val mod 32;
+               		IF mar = 25 THEN
+               		    ll := TRUE;
+               			jj := ind 
+               		END
+               END;
+               ind := ind + 1
+           INVARIANT
+               ll : BOOL
+               & c_array :minIndex..maxIndex --> INT
+               & ind : minIndex..tmp+1
+               & val : INT
+               & mar : NAT
+               & jj: minIndex..maxIndex
+               & jj <= ind
+               & (ll = TRUE => (!ii.(ii:minIndex..jj-1 => (0<=c_array(ii) => not(c_array(ii) mod 32 = 25))) & c_array(jj) mod 32 = 25))
+			   & (ll = FALSE => !ii.(ii:minIndex..ind-1 => (0<=c_array(ii) => not(c_array(ii) mod 32 = 25))))
+           VARIANT
+               (tmp+1)-ind
+           END;
+           c_has_special := ll;
+           c_special_index := jj
+       END;
+       logic_status := LOGIC_SPECIAL_SEARCH_DONE
+   END;
+    
+    write_result =
+    BEGIN
+        ui.write_result(c_array, c_has_special, c_special_index) ;
+        logic_status := LOGIC_COMPLETED
+    END
+ END
