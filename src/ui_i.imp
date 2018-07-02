@@ -1,0 +1,114 @@
+/* ui_i
+ * Author: Szegedi Gábor D071PO
+ * Creation date: 2018-06-29
+ */
+ 
+IMPLEMENTATION
+    ui_i
+REFINES
+    ui   
+IMPORTS
+    BASIC_IO
+DEFINITIONS
+    "constants.def"
+CONCRETE_VARIABLES
+    c_ui_status
+INVARIANT    
+    c_ui_status : S_UI_STATUS
+    & c_ui_status = ui_status
+    
+INITIALISATION
+    c_ui_status := UI_INIT
+    
+OPERATIONS
+
+    ui_init =
+    BEGIN
+        c_ui_status := UI_INIT
+    END;
+
+    ret <--read_a_array =
+    BEGIN
+    STRING_WRITE("Kérem az első tömb elemeit.\n"); 
+        VAR kk, arr, read IN
+            kk := minIndex;
+            arr := (minIndex .. maxIndex)*{minValue};
+            WHILE kk <= maxIndex DO
+                STRING_WRITE("Kérlek adj meg egy egész számot ");
+                INT_WRITE(minValue);
+                STRING_WRITE(" és ");
+                INT_WRITE(maxValue);
+                STRING_WRITE(" között:") ;
+
+                read <-- INTERVAL_READ(minValue, maxValue);
+                arr(kk) := read;
+                kk := kk + 1
+            INVARIANT
+                kk : minIndex .. maxIndex +1  
+                & arr : minIndex .. maxIndex --> minValue..maxValue
+            VARIANT
+                maxIndex+1 - kk
+            END ;
+            ret := arr;
+            c_ui_status := UI_A_IS_READ
+        END
+    END
+    ;
+ret <-- read_b_array =
+BEGIN
+    STRING_WRITE("Kérem a második tömb elemeit.\n");  
+    VAR ii, read    
+       IN
+           ret:=(minIndex..maxIndex)*{minValue};
+           read := maxValue+1;
+           ii := minIndex;
+       
+       WHILE ii <= maxIndex DO
+           STRING_WRITE("Kérlek adj meg egy egész számot ");
+           INT_WRITE(0+maxIndex-ii);
+           STRING_WRITE(" és ");
+           INT_WRITE(read-1);
+           STRING_WRITE(" között:") ;
+                
+           read <-- INTERVAL_READ(0+maxIndex-ii, read-1);
+           ret(ii) := read;
+           ii := ii + 1
+       INVARIANT
+           ii : minIndex..maxIndex+1
+           & read : (minValue+maxIndex-ii+1)..(maxValue+1)
+           & ret : minIndex..maxIndex --> minValue..maxValue
+           & !jj.(jj : minIndex..ii-1 => ret(jj) > read-1)
+           & !jj.(jj : minIndex..ii-2 => ret(jj+1) < ret(jj))    
+       VARIANT
+           (maxIndex+1)-ii
+       END
+      END;
+       c_ui_status := UI_B_IS_READ       
+   END;
+       
+    write_result(p_res, mod_ll, mod_ind) =
+    BEGIN        
+        VAR ii IN
+            STRING_WRITE("Az eredmény: ");
+            ii := minIndex;
+            WHILE ii <= maxIndex DO
+                INT_WRITE(p_res(ii));
+                STRING_WRITE(", ");
+                ii := ii + 1
+            INVARIANT
+                ii : minIndex .. maxIndex+1  
+            VARIANT
+                (maxIndex+1) - ii
+            END
+        END;
+        STRING_WRITE("\n");
+        IF mod_ll = TRUE
+        THEN
+            STRING_WRITE("Van megfelelő elem, az indexe: ");
+            INT_WRITE(mod_ind)
+        ELSE
+            STRING_WRITE("Nincs megfelelő elem.")
+        END;
+        c_ui_status := UI_RES_IS_WRITTEN
+    END
+END
